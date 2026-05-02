@@ -336,13 +336,13 @@ body {
     );
   background-size: 22px 22px, 100% 100%;
   background-repeat: repeat, no-repeat;
-  color: #d8d8d8;
+  color: #e2e2e2;
 }
 
 .landing-human-doc {
   font-size: 1rem;
   line-height: 1.65;
-  color: #d6d6d6;
+  color: #e4e4e4;
 }
 
 .landing-human-doc :where(h1, h2, h3) {
@@ -351,6 +351,6 @@ body {
 }
 
 .landing-human-doc :where(strong) {
-  color: #ffffff;
+  color: #fafafa;
   font-weight: 600;
 }

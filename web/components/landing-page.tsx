@@ -8,7 +8,6 @@ import Link from "next/link";
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -159,7 +158,7 @@ const BEHIND_THE_SCENES = {
     peekLabel: "¿Cómo armamos esta bienvenida?",
     title: "Qué ves arriba y por qué está ordenado así",
     paragraphs: [
-      "Arriba del bloque «Somos Bexo» tenés el hero en lime de marca (#B2CC28): textos en navy para contraste, CTA principal relleno navy y —en pantallas grandes— un diagrama en tarjetas claras que conecta «Operación» y «Números». Debajo, el panel amplía con ejemplos y el recorrido Hoy → Con Bexo → Después.",
+      "Arriba del bloque «Somos Bexo» tenés el hero en lime de marca: promesa en dos líneas, chip y CTAs; en pantallas grandes, un diagrama que conecta «Operación» y «Números». Debajo, el panel amplía con ejemplos y el recorrido Hoy → Con Bexo → Después.",
       "Los botones te llevan a coordinar una reunión o a seguir leyendo las señales típicas cuando el software ya no acompaña al negocio. No hace falta saber de programación: todo está pensado para que entiendas la propuesta antes de comprometer tiempo.",
     ],
   },
@@ -222,7 +221,7 @@ function BehindTheScenesBlock({ id }: { id: BehindTheScenesId }) {
       <h3 className="font-display text-base font-bold tracking-tight text-[var(--color-lime)] sm:text-lg">
         {copy.title}
       </h3>
-      <div className="mt-3 space-y-3 font-body text-[16px] font-medium leading-relaxed text-[#dadada] sm:text-[17px]">
+      <div className="mt-3 space-y-3 font-body text-[16px] font-medium leading-relaxed text-[#e6e6e6] sm:text-[17px]">
         {copy.paragraphs.map((p, i) => (
           <p key={i}>{p}</p>
         ))}
@@ -353,7 +352,7 @@ function HumanPanel({
   return (
     <div
       className={[
-        "relative overflow-hidden rounded-2xl border border-[#4a4a4a] bg-[#2a2a2a] px-5 py-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_12px_40px_rgba(0,0,0,0.25)] sm:px-8 sm:py-9",
+        "relative overflow-hidden rounded-2xl border border-[#5c5c5c] bg-[#303030] px-5 py-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.09),0_12px_40px_rgba(0,0,0,0.3)] sm:px-8 sm:py-9",
         className,
       ].join(" ")}
     >
@@ -397,13 +396,13 @@ function CodePeek({
   children: ReactNode;
 }) {
   return (
-    <details className="group/codepeek mt-6 overflow-hidden rounded-xl border border-[#3a3a3a] bg-[#181818]/95 open:border-[color-mix(in_srgb,var(--color-lime)_28%,#3a3a3a)] open:shadow-[0_0_0_1px_rgba(178,204,40,0.08)]">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 font-body text-[15px] leading-snug text-[#e4e4e4] transition-colors hover:bg-white/[0.04] [&::-webkit-details-marker]:hidden">
-        <span className="min-w-0 flex-1 font-medium text-white">{label}</span>
+    <details className="group/codepeek mt-6 overflow-hidden rounded-xl border border-[#4a4a4a] bg-[#1c1c1c] open:border-[color-mix(in_srgb,var(--color-lime)_38%,#4a4a4a)] open:shadow-[0_0_0_1px_rgba(178,204,40,0.12)]">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 font-body text-[15px] leading-snug text-[#ececec] transition-colors hover:bg-white/[0.06] [&::-webkit-details-marker]:hidden">
+        <span className="min-w-0 flex-1 font-semibold text-white">{label}</span>
         <IconChevronDown className="h-5 w-5 shrink-0 text-[var(--color-lime)] transition-transform duration-200 group-open/codepeek:rotate-180" />
       </summary>
-      <div className="border-t border-[#3a3a3a] bg-[#141414] px-2 py-3 sm:px-3">
-        <div className="overflow-hidden rounded-lg border border-[#2d2d30] bg-[#1e1e1e] px-2 py-3 shadow-inner sm:px-3">
+      <div className="border-t border-[#454545] bg-[#161616] px-2 py-3 sm:px-3">
+        <div className="overflow-hidden rounded-lg border border-[#3a3a3a] bg-[#222222] px-2 py-3 shadow-inner sm:px-3">
           {children}
         </div>
       </div>
@@ -424,44 +423,7 @@ export function LandingPage() {
   const reduceMotion = useReducedMotion();
   const mainRef = useRef<HTMLElement | null>(null);
   const navBtnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const scrollSpyEnabledRef = useRef(false);
   const [mainMounted, setMainMounted] = useState(false);
-  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
-  const [tourVisible, setTourVisible] = useState(false);
-  const [tourMessage, setTourMessage] = useState("");
-  const [sidebarPulse, setSidebarPulse] = useState(false);
-
-  useLayoutEffect(() => {
-    if (typeof window !== "undefined") {
-      const nav = performance.getEntriesByType(
-        "navigation",
-      )[0] as PerformanceNavigationTiming | undefined;
-      const isReload = nav?.type === "reload";
-      const forceTour = new URLSearchParams(window.location.search).has(
-        "tour",
-      );
-      if (isReload || forceTour) {
-        sessionStorage.removeItem("bexo-onboard");
-        if (forceTour) {
-          window.history.replaceState(
-            null,
-            "",
-            `${window.location.pathname}${window.location.hash}`,
-          );
-        }
-      }
-    }
-    if (sessionStorage.getItem("bexo-onboard") === "1" || reduceMotion) {
-      if (reduceMotion) sessionStorage.setItem("bexo-onboard", "1");
-      setOnboardingDone(true);
-    } else {
-      setOnboardingDone(false);
-    }
-  }, [reduceMotion]);
-
-  useEffect(() => {
-    scrollSpyEnabledRef.current = onboardingDone === true;
-  }, [onboardingDone]);
 
   const scrollToSection = useCallback(
     (sectionId: string, opts?: { behavior?: ScrollBehavior }) => {
@@ -535,14 +497,13 @@ export function LandingPage() {
   }, []);
 
   useEffect(() => {
-    if (onboardingDone !== true || !mainRef.current) return;
+    if (!mainMounted || !mainRef.current) return;
     const main = mainRef.current;
     const sectionByDomId = Object.fromEntries(
       LANDING_NAV_SECTIONS.map((s) => [s.id, s.id] as const),
     );
 
     const onMainScroll = () => {
-      if (!scrollSpyEnabledRef.current) return;
       if (main.scrollTop < 96) {
         setActiveSection(LANDING_NAV_SECTIONS[0].id);
         return;
@@ -552,7 +513,6 @@ export function LandingPage() {
 
     const obs = new IntersectionObserver(
       (entries) => {
-        if (!scrollSpyEnabledRef.current) return;
         const visible = entries.filter(
           (e) => e.isIntersecting && e.intersectionRatio >= 0.12,
         );
@@ -581,84 +541,12 @@ export function LandingPage() {
       main.removeEventListener("scroll", onMainScroll);
       obs.disconnect();
     };
-  }, [onboardingDone, mainMounted]);
+  }, [mainMounted]);
 
-  useEffect(() => {
-    if (onboardingDone !== false) return;
-
-    let cancelled = false;
-    const sleep = (ms: number) =>
-      new Promise<void>((resolve) => window.setTimeout(resolve, ms));
-
-    (async () => {
-      setTourVisible(true);
-      setSidebarPulse(true);
-
-      setTourMessage(
-        "Te damos la bienvenida. Priorizamos el tiempo de quien ya trabaja con nosotros, así que todavía no invertimos en una web \"de estudio\". Esta presentación está armada con el mismo tipo de entorno en el que construimos productos: es nuestra forma directa de mostrarte propuesta, riesgos, cómo trabajamos y, si querés profundizar, una explicación en palabras simples bajo cada bloque principal.",
-      );
-      await sleep(5500);
-      if (cancelled) return;
-
-      setTourMessage(
-        "Arriba tenés las pestañas de la landing: un clic en cada una te lleva a esa parte. A la izquierda están nuestras SaaS: cada una abre su ficha en una pestaña nueva.",
-      );
-      await sleep(4500);
-      if (cancelled) return;
-
-      for (let i = 0; i < LANDING_NAV_SECTIONS.length; i++) {
-        const { id, title } = LANDING_NAV_SECTIONS[i];
-        setTourMessage(
-          `Recorremos la landing — ahora: «${title}». Podés volver a cualquier bloque desde la barra superior.`,
-        );
-        setActiveSection(id);
-        document.getElementById(id)?.scrollIntoView({
-          behavior: "auto",
-          block: "start",
-        });
-        navBtnRefs.current[id]?.scrollIntoView({
-          block: "nearest",
-          behavior: "auto",
-        });
-        await sleep(980);
-        if (cancelled) return;
-      }
-
-      setTourMessage(
-        "Cuando scrollees por tu cuenta, la pestaña activa sigue la sección que estás leyendo.",
-      );
-      await sleep(4000);
-      if (cancelled) return;
-
-      const first = LANDING_NAV_SECTIONS[0];
-      setActiveSection(first.id);
-      document.getElementById(first.id)?.scrollIntoView({
-        behavior: "auto",
-        block: "start",
-      });
-      navBtnRefs.current[first.id]?.scrollIntoView({
-        block: "nearest",
-        behavior: "auto",
-      });
-      await sleep(900);
-      if (cancelled) return;
-
-      setSidebarPulse(false);
-      setTourVisible(false);
-      sessionStorage.setItem("bexo-onboard", "1");
-      setOnboardingDone(true);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [onboardingDone]);
-
-  const showCustomCursor =
-    onboardingDone !== null && !reduceMotion;
+  const showCustomCursor = !reduceMotion;
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-[var(--ide-bg)] text-[#cccccc]">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-[var(--ide-bg)] text-[#dcdcdc]">
       {/* Title bar */}
       <header className="flex h-9 shrink-0 items-center gap-2 border-b border-[color-mix(in_srgb,var(--color-navy)_18%,transparent)] bg-[var(--color-lime)] px-2 text-[13px] text-[var(--color-navy)]">
         <button
@@ -692,17 +580,6 @@ export function LandingPage() {
       <div className="relative flex min-h-0 flex-1 flex-col bg-[var(--ide-bg)] lg:flex-row">
         {/* SaaS — enlaces a fichas de producto (nueva pestaña) */}
         <motion.aside
-          animate={
-            reduceMotion
-              ? undefined
-              : {
-                  scale: sidebarPulse ? 1.02 : 1,
-                  boxShadow: sidebarPulse
-                    ? "0 0 0 2px rgba(178,204,40,0.45), 0 12px 40px rgba(0,0,0,0.35)"
-                    : "0 0 0 0px rgba(178,204,40,0)",
-                }
-          }
-          transition={{ type: "spring", stiffness: 260, damping: 28 }}
           className={[
             "z-30 flex w-[min(320px,92vw)] shrink-0 flex-col border-[var(--ide-border)] text-[16px] transition-[transform,opacity] max-lg:fixed max-lg:inset-y-8 max-lg:left-0 max-lg:top-8 max-lg:border-y max-lg:border-r max-lg:shadow-xl",
             "bg-[linear-gradient(180deg,color-mix(in_srgb,var(--color-lime)_14%,#2a2520)_0%,#252526_22%,var(--ide-sidebar)_55%)]",
@@ -716,7 +593,7 @@ export function LandingPage() {
             <p className="font-display text-[15px] font-bold uppercase tracking-[0.16em] text-[#e8e8e8]">
               Nuestras SaaS
             </p>
-            <p className="mt-1.5 font-body text-[14px] leading-snug text-[#909090] sm:text-[15px]">
+            <p className="mt-1.5 font-body text-[14px] leading-snug text-[#a8a8a8] sm:text-[15px]">
               Pasá el mouse por un producto (escritorio) para ver la ficha
               ampliada al costado.
             </p>
@@ -747,10 +624,10 @@ export function LandingPage() {
                       </span>
                     ) : null}
                   </span>
-                  <span className="mt-1.5 block font-body text-[14px] leading-snug text-[#a0a0a0] sm:text-[15px]">
+                  <span className="mt-1.5 block font-body text-[14px] leading-snug text-[#b4b4b4] sm:text-[15px]">
                     {item.sector}
                   </span>
-                  <span className="mt-2 block font-body text-[14px] leading-snug text-[#c8c8c8] sm:text-[15px]">
+                  <span className="mt-2 block font-body text-[14px] leading-snug text-[#dadada] sm:text-[15px]">
                     {item.hook}
                   </span>
                   <span className="mt-2.5 inline-flex items-center gap-1.5 font-body text-[13px] font-semibold text-[var(--color-lime)] sm:text-[14px]">
@@ -804,7 +681,7 @@ export function LandingPage() {
                   ].join(" ")}
                 >
                   <span className="block whitespace-nowrap">{item.title}</span>
-                  <span className="mt-1 hidden max-w-[11rem] truncate font-body text-[12px] font-normal leading-snug text-[#a8a8a8] sm:block sm:max-w-[12rem] sm:text-[13px]">
+                  <span className="mt-1 hidden max-w-[11rem] truncate font-body text-[12px] font-medium leading-snug text-[#bdbdbd] sm:block sm:max-w-[12rem] sm:text-[13px]">
                     {item.hint}
                   </span>
                 </button>
@@ -1422,28 +1299,6 @@ export function LandingPage() {
         </aside>
       </div>
 
-      {tourVisible ? (
-        <div
-          className="pointer-events-auto fixed inset-0 z-[100001] flex items-end justify-center bg-black/45 pb-[max(2rem,env(safe-area-inset-bottom))] sm:items-center sm:pb-0"
-          aria-live="polite"
-          role="status"
-        >
-          <motion.div
-            key={tourMessage.slice(0, 48)}
-            initial={{ opacity: 0, y: 18, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.4, ease: CONTENT_EASE }}
-            className="mx-4 max-w-md rounded-2xl border border-[color-mix(in_srgb,var(--color-lime)_25%,#444)] bg-[#1b1b1b]/96 px-5 py-4 text-center shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-md sm:px-6 sm:py-5"
-          >
-            <p className="font-body text-sm leading-relaxed text-[#efefef]">
-              {tourMessage}
-            </p>
-            <p className="mt-3 font-body text-[12px] text-[#888]">
-              No hace falta hacer clic — seguí viendo la pantalla.
-            </p>
-          </motion.div>
-        </div>
-      ) : null}
       <LandingCustomCursor active={showCustomCursor} />
     </div>
   );
