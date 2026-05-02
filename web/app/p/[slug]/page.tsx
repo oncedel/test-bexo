@@ -40,11 +40,11 @@ export default async function SaasProjectPage({
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3">
           <Link
             href="/"
-            className="font-display text-sm font-bold uppercase tracking-[0.14em] text-[#b0b0b0] hover:text-white"
+            className="font-display text-base font-bold uppercase tracking-[0.14em] text-[#b0b0b0] hover:text-white"
           >
             ← Volver al inicio
           </Link>
-          <span className="rounded-full border border-[color-mix(in_srgb,var(--color-lime)_40%,#555)] bg-[color-mix(in_srgb,var(--color-lime)_12%,#2a2a2a)] px-3 py-1 font-body text-[11px] font-semibold uppercase tracking-wide text-[var(--color-lime)]">
+          <span className="rounded-full border border-[color-mix(in_srgb,var(--color-lime)_40%,#555)] bg-[color-mix(in_srgb,var(--color-lime)_12%,#2a2a2a)] px-3 py-1 font-body text-[12px] font-semibold uppercase tracking-wide text-[var(--color-lime)]">
             SaaS Bexo
           </span>
         </div>
@@ -52,33 +52,40 @@ export default async function SaasProjectPage({
 
       <main className="mx-auto max-w-3xl px-4 py-10 sm:px-8 sm:py-14">
         {p.featured ? (
-          <p className="font-body text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--color-lime)]">
+          <p className="font-body text-[12px] font-bold uppercase tracking-[0.18em] text-[var(--color-lime)]">
             Línea destacada
           </p>
         ) : null}
-        <h1 className="mt-2 font-display text-[clamp(1.75rem,5vw,2.5rem)] font-bold leading-tight tracking-tight text-white">
+        <h1 className="mt-2 font-display text-[clamp(2rem,5.5vw,2.75rem)] font-bold leading-tight tracking-tight text-white">
           {p.name}
         </h1>
-        <p className="mt-2 font-body text-sm font-semibold uppercase tracking-wider text-[#9a9a9a]">
+        <p className="mt-2 font-body text-base font-semibold uppercase tracking-wider text-[#9a9a9a]">
           {p.sector}
         </p>
-        <p className="mt-6 font-body text-lg leading-relaxed text-[#c8c8c8]">
+        <p className="mt-6 font-body text-xl leading-relaxed text-[#c8c8c8]">
           {p.hook}
         </p>
-        <p className="mt-8 font-body text-[15px] leading-relaxed text-[#a8a8a8]">
-          Esta es la ficha pública del producto. Para alcance, integraciones y
-          tiempos reales, coordiná una conversación con el equipo.
+        <p className="mt-8 font-body text-[16px] leading-relaxed text-[#a8a8a8]">
+          {p.publicNote}
         </p>
+        <ul className="mt-6 space-y-2.5 font-body text-[16px] leading-relaxed text-[#c4c4c4]">
+          {p.bullets.map((b) => (
+            <li key={b} className="flex gap-2">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-lime)]" />
+              <span>{b}</span>
+            </li>
+          ))}
+        </ul>
         <div className="mt-10 flex flex-wrap gap-3">
           <a
             href={MAIL_HREF}
-            className="inline-flex items-center justify-center rounded-lg bg-[var(--color-lime)] px-5 py-3 font-body text-sm font-bold text-[#131428] hover:opacity-95"
+            className="inline-flex items-center justify-center rounded-lg bg-[var(--color-lime)] px-5 py-3 font-body text-base font-bold text-[#131428] hover:opacity-95"
           >
             Coordinar reunión
           </a>
           <Link
             href="/"
-            className="inline-flex items-center justify-center rounded-lg border border-[#5a5a5a] bg-[#333]/50 px-5 py-3 font-body text-sm font-semibold text-white shadow-sm hover:border-[#777] hover:bg-[#3a3a3a]"
+            className="inline-flex items-center justify-center rounded-lg border border-[#5a5a5a] bg-[#333]/50 px-5 py-3 font-body text-base font-semibold text-white shadow-sm hover:border-[#777] hover:bg-[#3a3a3a]"
           >
             Ver presentación Bexo
           </Link>
