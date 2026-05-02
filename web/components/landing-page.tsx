@@ -1,5 +1,6 @@
 "use client";
 
+import { InicioHero } from "@/components/inicio-hero";
 import { LandingChatPanel } from "@/components/landing-chat-panel";
 import { LandingCustomCursor } from "@/components/landing-custom-cursor";
 import { motion, useReducedMotion } from "framer-motion";
@@ -11,9 +12,10 @@ import {
   useRef,
   useState,
   type ReactNode,
+  type RefObject,
 } from "react";
 
-import { SAAS_PRODUCTS } from "@/lib/saas-products";
+import { SAAS_PRODUCTS, type SaasProduct } from "@/lib/saas-products";
 import {
   IconArrowRight,
   IconCalendar,
@@ -157,7 +159,7 @@ const BEHIND_THE_SCENES = {
     peekLabel: "¿Cómo armamos esta bienvenida?",
     title: "Qué ves arriba y por qué está ordenado así",
     paragraphs: [
-      "Esta primera parte resume en lenguaje claro qué hace Bexo, para qué tipo de empresas trabajamos y qué podés esperar si nos escribís.",
+      "Arriba del bloque «Somos Bexo» tenés el hero en lime de marca (#B2CC28): textos en navy para contraste, CTA principal relleno navy y —en pantallas grandes— un diagrama en tarjetas claras que conecta «Operación» y «Números». Debajo, el panel amplía con ejemplos y el recorrido Hoy → Con Bexo → Después.",
       "Los botones te llevan a coordinar una reunión o a seguir leyendo las señales típicas cuando el software ya no acompaña al negocio. No hace falta saber de programación: todo está pensado para que entiendas la propuesta antes de comprometer tiempo.",
     ],
   },
@@ -220,10 +222,94 @@ function BehindTheScenesBlock({ id }: { id: BehindTheScenesId }) {
       <h3 className="font-display text-base font-bold tracking-tight text-[var(--color-lime)] sm:text-lg">
         {copy.title}
       </h3>
-      <div className="mt-3 space-y-3 font-body text-[14px] leading-relaxed text-[#c8c8c8] sm:text-[15px]">
+      <div className="mt-3 space-y-3 font-body text-[16px] font-medium leading-relaxed text-[#dadada] sm:text-[17px]">
         {copy.paragraphs.map((p, i) => (
           <p key={i}>{p}</p>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/** Card lateral al hover (solo puntero fino + pantalla grande; mismo lenguaje visual que HumanPanel). */
+function SaasHoverFlyout({
+  product,
+  position,
+  innerRef,
+  onMouseEnter,
+  onMouseLeave,
+}: {
+  product: SaasProduct;
+  position: { left: number; top: number };
+  innerRef: RefObject<HTMLDivElement | null>;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+}) {
+  const btnBase =
+    "flex h-12 min-h-12 flex-1 basis-0 items-center justify-center gap-1.5 rounded-lg px-2 font-body text-[13px] font-semibold leading-none whitespace-nowrap";
+
+  return (
+    <div
+      ref={innerRef}
+      role="tooltip"
+      className="fixed z-[80] hidden max-h-[min(68vh,460px)] w-[min(360px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border-2 border-[#5c5c5c] bg-[#1a1a1a] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_52px_rgba(0,0,0,0.55)] lg:flex"
+      style={{ left: position.left, top: position.top }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      <div
+        className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[var(--color-lime)]/12 blur-2xl"
+        aria-hidden
+      />
+      <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-4 pt-5">
+        {product.featured ? (
+          <p className="font-body text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-lime)]">
+            Línea destacada
+          </p>
+        ) : null}
+        <p className="font-display text-lg font-bold leading-tight tracking-tight text-white sm:text-xl">
+          {product.name}
+        </p>
+        <p className="mt-1.5 inline-flex rounded-full border-2 border-[color-mix(in_srgb,var(--color-lime)_55%,#666)] bg-[color-mix(in_srgb,var(--color-lime)_16%,#252525)] px-2.5 py-0.5 font-body text-[12px] font-semibold uppercase tracking-wide text-[var(--color-lime)]">
+          {product.sector}
+        </p>
+        <p className="mt-3 font-body text-[14px] font-medium leading-snug text-[#eaeaea] sm:text-[15px]">
+          {product.hook}
+        </p>
+        <ul className="mt-3 space-y-1.5 border-t-2 border-[#4a4a4a] pt-3 font-body text-[13px] font-medium leading-snug text-[#dedede] sm:text-[14px]">
+          {product.bullets.map((b) => (
+            <li key={b} className="flex gap-2">
+              <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-lime)] sm:h-4 sm:w-4" />
+              <span>{b}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 font-body text-[12px] font-medium leading-snug text-[#b8b8b8] sm:text-[13px]">
+          {product.publicNote}
+        </p>
+      </div>
+
+      <div className="shrink-0 border-t-2 border-[#4a4a4a] bg-[#141414] px-4 py-3">
+        <div className="flex gap-2">
+          <Link
+            href={`/p/${product.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Abrir ficha completa en una pestaña nueva"
+            className={`${btnBase} bg-[var(--color-lime)] font-bold text-[#131428] transition-opacity hover:opacity-95`}
+          >
+            <IconArrowRight className="h-4 w-4 shrink-0" />
+            <span className="min-w-0 truncate">Abrir ficha</span>
+          </Link>
+          <a
+            href={MAIL_HREF}
+            title="Coordinar reunión por correo"
+            className={`${btnBase} border-2 border-[#6a6a6a] bg-[#2e2e2e] font-bold text-white hover:border-[#888] hover:bg-[#3a3a3a]`}
+          >
+            <IconCalendar className="h-4 w-4 shrink-0 text-[var(--color-lime)]" />
+            <span className="min-w-0 truncate">Coordinar</span>
+          </a>
+        </div>
       </div>
     </div>
   );
@@ -312,7 +398,7 @@ function CodePeek({
 }) {
   return (
     <details className="group/codepeek mt-6 overflow-hidden rounded-xl border border-[#3a3a3a] bg-[#181818]/95 open:border-[color-mix(in_srgb,var(--color-lime)_28%,#3a3a3a)] open:shadow-[0_0_0_1px_rgba(178,204,40,0.08)]">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 font-body text-[14px] leading-snug text-[#e4e4e4] transition-colors hover:bg-white/[0.04] [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 font-body text-[15px] leading-snug text-[#e4e4e4] transition-colors hover:bg-white/[0.04] [&::-webkit-details-marker]:hidden">
         <span className="min-w-0 flex-1 font-medium text-white">{label}</span>
         <IconChevronDown className="h-5 w-5 shrink-0 text-[var(--color-lime)] transition-transform duration-200 group-open/codepeek:rotate-180" />
       </summary>
@@ -328,6 +414,13 @@ function CodePeek({
 export function LandingPage() {
   const [activeSection, setActiveSection] = useState("inicio");
   const [saasPanelOpen, setSaasPanelOpen] = useState(false);
+  const saasFlyoutRef = useRef<HTMLDivElement>(null);
+  const saasFlyoutCloseTimer = useRef<number | null>(null);
+  const [saasFlyout, setSaasFlyout] = useState<{
+    product: SaasProduct;
+    left: number;
+    top: number;
+  } | null>(null);
   const reduceMotion = useReducedMotion();
   const mainRef = useRef<HTMLElement | null>(null);
   const navBtnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -374,6 +467,11 @@ export function LandingPage() {
     (sectionId: string, opts?: { behavior?: ScrollBehavior }) => {
       setActiveSection(sectionId);
       setSaasPanelOpen(false);
+      setSaasFlyout(null);
+      if (saasFlyoutCloseTimer.current != null) {
+        window.clearTimeout(saasFlyoutCloseTimer.current);
+        saasFlyoutCloseTimer.current = null;
+      }
       const el = document.getElementById(sectionId);
       const behavior =
         opts?.behavior ?? (reduceMotion ? "auto" : "smooth");
@@ -387,6 +485,54 @@ export function LandingPage() {
     },
     [reduceMotion],
   );
+
+  const clearSaasFlyoutClose = useCallback(() => {
+    if (saasFlyoutCloseTimer.current != null) {
+      window.clearTimeout(saasFlyoutCloseTimer.current);
+      saasFlyoutCloseTimer.current = null;
+    }
+  }, []);
+
+  const scheduleSaasFlyoutClose = useCallback(() => {
+    clearSaasFlyoutClose();
+    saasFlyoutCloseTimer.current = window.setTimeout(() => {
+      setSaasFlyout(null);
+      saasFlyoutCloseTimer.current = null;
+    }, 160);
+  }, [clearSaasFlyoutClose]);
+
+  const positionSaasFlyout = useCallback(
+    (el: HTMLElement, product: SaasProduct) => {
+      if (typeof window === "undefined" || window.innerWidth < 1024) return;
+      const r = el.getBoundingClientRect();
+      const cardW = Math.min(340, window.innerWidth - 32);
+      const estH = Math.min(window.innerHeight * 0.68, 460);
+      const gutter = 8;
+      let left = r.right + gutter;
+      if (left + cardW > window.innerWidth - 12) {
+        left = Math.max(12, r.left - cardW - gutter);
+      }
+      let top = r.top;
+      if (top + estH > window.innerHeight - 12) {
+        top = window.innerHeight - estH - 12;
+      }
+      if (top < 12) top = 12;
+      setSaasFlyout({ product, left, top });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    return () => clearSaasFlyoutClose();
+  }, [clearSaasFlyoutClose]);
+
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth < 1024) setSaasFlyout(null);
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     if (onboardingDone !== true || !mainRef.current) return;
@@ -514,29 +660,29 @@ export function LandingPage() {
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-[var(--ide-bg)] text-[#cccccc]">
       {/* Title bar */}
-      <header className="flex h-8 shrink-0 items-center gap-2 border-b border-[color-mix(in_srgb,var(--color-navy)_18%,transparent)] bg-[var(--color-lime)] px-2 text-[11px] text-[var(--color-navy)]">
+      <header className="flex h-9 shrink-0 items-center gap-2 border-b border-[color-mix(in_srgb,var(--color-navy)_18%,transparent)] bg-[var(--color-lime)] px-2 text-[13px] text-[var(--color-navy)]">
         <button
           type="button"
-          className="flex h-7 items-center rounded px-2 font-ide-mono text-[var(--color-navy)] hover:bg-[color-mix(in_srgb,var(--color-navy)_12%,transparent)] lg:hidden"
+          className="flex h-8 items-center rounded px-2.5 font-ide-mono text-[13px] font-semibold text-[var(--color-navy)] hover:bg-[color-mix(in_srgb,var(--color-navy)_12%,transparent)] lg:hidden"
           aria-label="Abrir listado de productos SaaS"
           aria-expanded={saasPanelOpen}
           onClick={() => setSaasPanelOpen((v) => !v)}
         >
           SaaS
         </button>
-        <span className="hidden font-display text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--color-navy)] sm:inline">
+        <span className="hidden font-display text-[12px] font-bold uppercase tracking-[0.26em] text-[var(--color-navy)] sm:inline">
           Bexo
         </span>
         <span className="hidden text-[color-mix(in_srgb,var(--color-navy)_45%,transparent)] lg:inline">
           —
         </span>
-        <span className="hidden truncate font-body text-[11px] text-[color-mix(in_srgb,var(--color-navy)_78%,transparent)] lg:inline">
+        <span className="hidden truncate font-body text-[13px] text-[color-mix(in_srgb,var(--color-navy)_78%,transparent)] lg:inline">
           Software operativo B2B · Bexo
         </span>
         <div className="ml-auto flex items-center gap-2">
           <Link
             href={MAIL_HREF}
-            className="rounded px-2 py-0.5 font-ide-mono text-[10px] font-semibold text-[var(--color-navy)] underline-offset-2 hover:underline"
+            className="rounded px-2 py-0.5 font-ide-mono text-[12px] font-semibold text-[var(--color-navy)] underline-offset-2 hover:underline"
           >
             hola@bexo.digital
           </Link>
@@ -558,25 +704,26 @@ export function LandingPage() {
           }
           transition={{ type: "spring", stiffness: 260, damping: 28 }}
           className={[
-            "z-30 flex w-[min(300px,92vw)] shrink-0 flex-col border-[var(--ide-border)] text-[12px] transition-[transform,opacity] max-lg:fixed max-lg:inset-y-8 max-lg:left-0 max-lg:top-8 max-lg:border-y max-lg:border-r max-lg:shadow-xl",
+            "z-30 flex w-[min(320px,92vw)] shrink-0 flex-col border-[var(--ide-border)] text-[16px] transition-[transform,opacity] max-lg:fixed max-lg:inset-y-8 max-lg:left-0 max-lg:top-8 max-lg:border-y max-lg:border-r max-lg:shadow-xl",
             "bg-[linear-gradient(180deg,color-mix(in_srgb,var(--color-lime)_14%,#2a2520)_0%,#252526_22%,var(--ide-sidebar)_55%)]",
             saasPanelOpen
               ? "max-lg:translate-x-0 max-lg:opacity-100"
               : "max-lg:pointer-events-none max-lg:-translate-x-full max-lg:opacity-0",
-            "lg:static lg:w-[min(300px,34vw)] lg:max-w-[320px] lg:translate-x-0 lg:opacity-100 lg:shadow-none",
+            "lg:static lg:w-[min(320px,36vw)] lg:max-w-[380px] lg:translate-x-0 lg:opacity-100 lg:shadow-none",
           ].join(" ")}
         >
-          <div className="border-b border-[var(--ide-border)] px-3 py-2.5">
-            <p className="font-display text-[11px] font-bold uppercase tracking-[0.18em] text-[#e8e8e8]">
+          <div className="border-b border-[var(--ide-border)] px-3.5 py-3">
+            <p className="font-display text-[15px] font-bold uppercase tracking-[0.16em] text-[#e8e8e8]">
               Nuestras SaaS
             </p>
-            <p className="mt-1 font-body text-[11px] leading-snug text-[#909090]">
-              Cada producto abre en una pestaña nueva con su ficha pública.
+            <p className="mt-1.5 font-body text-[14px] leading-snug text-[#909090] sm:text-[15px]">
+              Pasá el mouse por un producto (escritorio) para ver la ficha
+              ampliada al costado.
             </p>
           </div>
 
           <nav
-            className="min-h-0 flex-1 space-y-1 overflow-y-auto py-3 pr-1 pl-2"
+            className="min-h-0 flex-1 space-y-1.5 overflow-y-auto py-3.5 pr-1.5 pl-2.5"
             aria-label="Productos SaaS"
           >
             {SAAS_PRODUCTS.map((item) => (
@@ -585,31 +732,45 @@ export function LandingPage() {
                   href={`/p/${item.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full rounded-lg border border-transparent bg-black/10 px-3 py-2.5 text-left transition-all duration-200 hover:border-[color-mix(in_srgb,var(--color-lime)_35%,#555)] hover:bg-[color-mix(in_srgb,var(--color-lime)_10%,transparent)]"
+                  className="block w-full rounded-lg border border-transparent bg-black/10 px-3.5 py-3 text-left transition-all duration-200 hover:border-[color-mix(in_srgb,var(--color-lime)_35%,#555)] hover:bg-[color-mix(in_srgb,var(--color-lime)_10%,transparent)]"
+                  onMouseEnter={(e) => {
+                    clearSaasFlyoutClose();
+                    positionSaasFlyout(e.currentTarget, item);
+                  }}
+                  onMouseLeave={scheduleSaasFlyoutClose}
                 >
-                  <span className="block font-display text-[13px] font-bold leading-tight text-[#f3f3f3]">
+                  <span className="block font-display text-[17px] font-bold leading-tight text-[#f3f3f3] sm:text-[18px]">
                     {item.name}
                     {item.featured ? (
-                      <span className="ml-2 align-middle font-body text-[9px] font-bold uppercase tracking-wide text-[var(--color-lime)]">
+                      <span className="ml-2 align-middle font-body text-[12px] font-bold uppercase tracking-wide text-[var(--color-lime)]">
                         · ref.
                       </span>
                     ) : null}
                   </span>
-                  <span className="mt-1 block font-body text-[11px] leading-snug text-[#a0a0a0]">
+                  <span className="mt-1.5 block font-body text-[14px] leading-snug text-[#a0a0a0] sm:text-[15px]">
                     {item.sector}
                   </span>
-                  <span className="mt-1.5 block font-body text-[11px] leading-snug text-[#c8c8c8]">
+                  <span className="mt-2 block font-body text-[14px] leading-snug text-[#c8c8c8] sm:text-[15px]">
                     {item.hook}
                   </span>
-                  <span className="mt-2 inline-flex items-center gap-1 font-body text-[10px] font-semibold text-[var(--color-lime)]">
+                  <span className="mt-2.5 inline-flex items-center gap-1.5 font-body text-[13px] font-semibold text-[var(--color-lime)] sm:text-[14px]">
                     Abrir ficha
-                    <IconArrowRight className="h-3 w-3" />
+                    <IconArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </span>
                 </Link>
               </div>
             ))}
           </nav>
         </motion.aside>
+        {saasFlyout ? (
+          <SaasHoverFlyout
+            product={saasFlyout.product}
+            position={{ left: saasFlyout.left, top: saasFlyout.top }}
+            innerRef={saasFlyoutRef}
+            onMouseEnter={clearSaasFlyoutClose}
+            onMouseLeave={scheduleSaasFlyoutClose}
+          />
+        ) : null}
         {saasPanelOpen ? (
           <button
             type="button"
@@ -625,7 +786,7 @@ export function LandingPage() {
             className="sticky top-0 z-10 shrink-0 border-b border-[var(--ide-border)] bg-[#252526] shadow-[inset_0_-1px_0_rgba(0,0,0,0.35)]"
             aria-label="Secciones de la presentación"
           >
-            <div className="flex max-w-full items-stretch gap-1 overflow-x-auto px-2 py-2 sm:gap-1.5 sm:px-3 sm:py-2.5 [scrollbar-width:thin]">
+            <div className="flex max-w-full items-stretch gap-1.5 overflow-x-auto px-2 py-2.5 sm:gap-2 sm:px-3 sm:py-3 [scrollbar-width:thin]">
               {LANDING_NAV_SECTIONS.map((item) => (
                 <button
                   key={item.id}
@@ -636,14 +797,14 @@ export function LandingPage() {
                   onClick={() => scrollToSection(item.id)}
                   title={item.hint}
                   className={[
-                    "shrink-0 rounded-lg border px-3 py-2 text-left font-display text-[12px] font-bold leading-tight transition-all duration-200 sm:px-3.5 sm:text-[13px]",
+                    "shrink-0 rounded-lg border px-3.5 py-2.5 text-left font-display text-[15px] font-bold leading-tight transition-all duration-200 sm:px-4 sm:py-3 sm:text-[16px]",
                     activeSection === item.id
                       ? "border-[color-mix(in_srgb,var(--color-lime)_55%,#5a6238)] bg-[color-mix(in_srgb,var(--color-lime)_24%,#2a3220)] text-white shadow-[0_0_20px_color-mix(in_srgb,var(--color-lime)_18%,transparent)]"
                       : "border-transparent bg-black/15 text-[#e2e2e2] hover:border-[color-mix(in_srgb,var(--color-lime)_22%,#444)] hover:bg-[color-mix(in_srgb,var(--color-lime)_8%,transparent)]",
                   ].join(" ")}
                 >
                   <span className="block whitespace-nowrap">{item.title}</span>
-                  <span className="mt-0.5 hidden max-w-[10rem] truncate font-body text-[9px] font-normal leading-tight text-[#a8a8a8] sm:block">
+                  <span className="mt-1 hidden max-w-[11rem] truncate font-body text-[12px] font-normal leading-snug text-[#a8a8a8] sm:block sm:max-w-[12rem] sm:text-[13px]">
                     {item.hint}
                   </span>
                 </button>
@@ -674,11 +835,11 @@ export function LandingPage() {
                     <IconChart className="h-7 w-7" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-display text-[15px] font-bold leading-tight text-white sm:text-lg">
+                    <p className="font-display text-[16px] font-bold leading-tight text-white sm:text-lg">
                       Menos fricción entre operación y números — desde el primer
                       mail
                     </p>
-                    <p className="mt-2 font-body text-[15px] leading-relaxed text-[#cfd2c8]">
+                    <p className="mt-2 font-body text-[16px] leading-relaxed text-[#cfd2c8]">
                       Si dirigís un negocio con mucha operación en paralelo, ya
                       sabés lo que cuesta cuando{" "}
                       <strong className="text-white">cada área mira una versión distinta del dato</strong>
@@ -700,6 +861,11 @@ export function LandingPage() {
               id="inicio"
               className="scroll-mt-2 border-b border-[#2d2d30] px-3 py-5 sm:px-4"
             >
+              <InicioHero
+                mailHref={MAIL_HREF}
+                onScrollToDiagnostico={() => scrollToSection("diagnostico")}
+              />
+
               <HumanPanel
                 lead={
                   <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -712,16 +878,16 @@ export function LandingPage() {
                     >
                       <IconSparkles className="h-7 w-7" />
                     </motion.div>
-                    <p className="max-w-[18rem] text-[11px] font-semibold uppercase leading-snug tracking-[0.18em] text-[var(--color-lime)] sm:max-w-none sm:tracking-[0.18em]">
+                    <p className="max-w-[18rem] text-[12px] font-semibold uppercase leading-snug tracking-[0.18em] text-[var(--color-lime)] sm:max-w-none sm:tracking-[0.18em]">
                       Pensado para dirección y responsables de área
                     </p>
                   </div>
                 }
               >
-                <p className="font-body text-[13px] font-medium uppercase tracking-[0.12em] text-[#9a9a9a]">
+                <p className="font-body text-[14px] font-medium uppercase tracking-[0.12em] text-[#9a9a9a]">
                   Software a medida para operaciones B2B
                 </p>
-                <h1 className="mt-2 font-display text-[clamp(1.65rem,4.6vw,2.55rem)] font-bold leading-[1.08] tracking-tight text-white">
+                <h2 className="mt-2 font-display text-[clamp(1.65rem,4.6vw,2.55rem)] font-bold leading-[1.08] tracking-tight text-white">
                   Somos{" "}
                   <span className="text-[color-mix(in_srgb,var(--color-lime)_92%,white)]">
                     Bexo
@@ -730,8 +896,8 @@ export function LandingPage() {
                   <span className="text-[color-mix(in_srgb,var(--color-lime)_88%,white)]">
                     dejen de pelear.
                   </span>
-                </h1>
-                <p className="mt-3 max-w-2xl font-body text-[15px] leading-relaxed text-[#e0e0e0] sm:text-[17px]">
+                </h2>
+                <p className="mt-3 max-w-2xl font-body text-[16px] leading-relaxed text-[#e0e0e0] sm:text-[18px]">
                   Trabajamos con empresas que{" "}
                   <strong className="font-semibold text-white">facturan de verdad</strong>
                   — constructoras, clubes, restaurantes, campo, logística y más.
@@ -769,13 +935,13 @@ export function LandingPage() {
                         row.accent,
                       ].join(" ")}
                     >
-                      <span className="font-mono text-[10px] font-bold text-[#888]">
+                      <span className="font-mono text-[11px] font-bold text-[#888]">
                         {row.step}
                       </span>
                       <p className="font-display mt-2 text-sm font-bold text-white">
                         {row.title}
                       </p>
-                      <p className="mt-2 font-body text-[13px] leading-relaxed text-[#c4c4c4]">
+                      <p className="mt-2 font-body text-[14px] leading-relaxed text-[#c4c4c4]">
                         {row.text}
                       </p>
                     </div>
@@ -783,11 +949,11 @@ export function LandingPage() {
                 </div>
 
                 <div className="mt-6 rounded-2xl border border-white/12 bg-[#141414]/85 p-4 sm:p-5">
-                  <p className="flex items-center gap-2 font-display text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-lime)]">
+                  <p className="flex items-center gap-2 font-display text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--color-lime)]">
                     <IconCube className="h-4 w-4" />
                     Nuestras SaaS (ficha en nueva pestaña)
                   </p>
-                  <ul className="mt-3 grid gap-2 font-body text-[14px] text-[#dedede] sm:grid-cols-2">
+                  <ul className="mt-3 grid gap-2 font-body text-[15px] text-[#dedede] sm:grid-cols-2">
                     {SAAS_PRODUCTS.map((prod) => (
                       <li
                         key={prod.slug}
@@ -827,7 +993,7 @@ export function LandingPage() {
                     <motion.li
                       key={t}
                       variants={staggerItem}
-                      className="flex items-center gap-1.5 rounded-full border border-[#4a4a4a] bg-[#2f2f2f]/90 px-3 py-1.5 font-body text-[12px] text-[#e4e4e4] shadow-sm"
+                      className="flex items-center gap-1.5 rounded-full border border-[#4a4a4a] bg-[#2f2f2f]/90 px-3 py-1.5 font-body text-[13px] text-[#e4e4e4] shadow-sm"
                     >
                       <IconCheck className="h-3.5 w-3.5 shrink-0 text-[var(--color-lime)]" />
                       {t}
@@ -855,7 +1021,7 @@ export function LandingPage() {
                     </button>
                   </motion.div>
                 </div>
-                <p className="mt-4 flex items-center gap-1.5 font-body text-[13px] text-[#8f8f8f]">
+                <p className="mt-4 flex items-center gap-1.5 font-body text-[14px] text-[#8f8f8f]">
                   <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-lime)] motion-safe:animate-pulse" />
                   Respuesta humana en menos de un día hábil · Latam
                 </p>
@@ -876,14 +1042,14 @@ export function LandingPage() {
                       <IconWarning className="h-6 w-6" />
                     </div>
                     <div>
-                      <h2 className="font-display text-xl font-bold text-white sm:text-2xl">
+                      <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
                         Antes de invertir: reconocé estas señales
                       </h2>
                     </div>
                   </div>
                 }
               >
-                <p className="mt-1 max-w-xl font-body text-[15px] leading-relaxed text-[#c8c8c8]">
+                <p className="mt-1 max-w-xl font-body text-[16px] leading-relaxed text-[#c8c8c8]">
                   Son patrones que vemos en diagnóstico cuando el software o los
                   procesos ya no acompañan el ritmo del negocio. Si te resonó
                   algo, suele ser buen momento para una conversación sin
@@ -900,7 +1066,7 @@ export function LandingPage() {
                     <motion.li
                       key={p}
                       variants={staggerItem}
-                      className="flex gap-3 rounded-lg border border-[#3d3d3d] bg-[#282828]/80 p-3 pl-3 font-body text-[15px] leading-snug text-[#ececec] shadow-sm"
+                      className="flex gap-3 rounded-lg border border-[#3d3d3d] bg-[#282828]/80 p-3 pl-3 font-body text-[16px] leading-snug text-[#ececec] shadow-sm"
                     >
                       <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-lime)_15%,#333)] text-[var(--color-lime)]">
                         <IconWarning className="h-4 w-4" />
@@ -934,13 +1100,13 @@ export function LandingPage() {
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-lime)_45%,#555)] bg-[color-mix(in_srgb,var(--color-lime)_12%,#2a2a2a)] text-[var(--color-lime)]">
                       <IconChart className="h-6 w-6" />
                     </div>
-                    <h2 className="font-display text-xl font-bold text-white sm:text-2xl">
+                    <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
                       Qué recuperás al trabajar con Bexo
                     </h2>
                   </div>
                 }
               >
-                <p className="font-body text-[15px] text-[#b0b0b0]">
+                <p className="font-body text-[16px] text-[#b0b0b0]">
                   Tres formas de volver al control — explicadas en negocio, no en
                   jerga.
                 </p>
@@ -972,7 +1138,7 @@ export function LandingPage() {
                         <h3 className="font-display mt-4 text-base font-bold text-white">
                           {w.title}
                         </h3>
-                        <p className="mt-2 font-body text-[14px] leading-relaxed text-[#b5b5b5] sm:text-[13px]">
+                        <p className="mt-2 font-body text-[15px] leading-relaxed text-[#b5b5b5] sm:text-[14px]">
                           {w.text}
                         </p>
                       </motion.article>
@@ -984,7 +1150,7 @@ export function LandingPage() {
                 <BehindTheScenesBlock id="diagnosticoValor" />
               </CodePeek>
 
-              <p className="mt-8 text-center font-body text-[13px] text-[#8f8f8f]">
+              <p className="mt-8 text-center font-body text-[14px] text-[#8f8f8f]">
                 ¿Querés profundidad por producto? En el menú{" "}
                 <strong className="text-[var(--color-lime)]">Nuestras SaaS</strong>{" "}
                 abrís cada ficha en una pestaña nueva.
@@ -1001,13 +1167,13 @@ export function LandingPage() {
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-lime)_45%,#555)] bg-[color-mix(in_srgb,var(--color-lime)_12%,#2a2a2a)] text-[var(--color-lime)]">
                       <IconProcess className="h-6 w-6" />
                     </div>
-                    <h2 className="font-display text-xl font-bold text-white sm:text-2xl">
+                    <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
                       Cómo es trabajar con nosotros
                     </h2>
                   </div>
                 }
               >
-                <p className="mt-1 font-body text-[15px] text-[#b0b0b0]">
+                <p className="mt-1 font-body text-[16px] text-[#b0b0b0]">
                   Transparente desde el primer mail: sabés qué esperar en cada
                   etapa.
                 </p>
@@ -1048,14 +1214,14 @@ export function LandingPage() {
                               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#333] text-[var(--color-lime)]">
                                 <SIcon className="h-5 w-5" />
                               </div>
-                              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--color-lime)]/50 bg-[#1a1a1a] font-mono text-[11px] font-bold text-[var(--color-lime)]">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--color-lime)]/50 bg-[#1a1a1a] font-mono text-[12px] font-bold text-[var(--color-lime)]">
                                 {i + 1}
                               </span>
                             </div>
                             <h3 className="font-display mt-4 text-sm font-bold text-white">
                               {s.title}
                             </h3>
-                            <p className="mt-2 font-body text-[13px] leading-relaxed text-[#ababab] sm:text-[14px]">
+                            <p className="mt-2 font-body text-[14px] leading-relaxed text-[#ababab] sm:text-[15px]">
                               {s.text}
                             </p>
                           </motion.div>
@@ -1080,13 +1246,13 @@ export function LandingPage() {
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#569cd6]/35 bg-[#1e2a38]/70 text-[#7dccff]">
                       <IconCpu className="h-6 w-6" />
                     </div>
-                    <h2 className="font-display text-xl font-bold text-white sm:text-2xl">
+                    <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
                       Tecnología seria, explicada simple
                     </h2>
                   </div>
                 }
               >
-                <p className="mt-1 max-w-2xl font-body text-[15px] leading-relaxed text-[#b8b8b8]">
+                <p className="mt-1 max-w-2xl font-body text-[16px] leading-relaxed text-[#b8b8b8]">
                   <strong className="font-semibold text-white">
                     React, Next.js y TypeScript
                   </strong>{" "}
@@ -1112,7 +1278,7 @@ export function LandingPage() {
                     <motion.span
                       key={tag}
                       variants={staggerItem}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#555] bg-[#2c2c2c] px-2.5 py-1.5 font-body text-[12px] text-[#ddd] shadow-sm"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#555] bg-[#2c2c2c] px-2.5 py-1.5 font-body text-[13px] text-[#ddd] shadow-sm"
                     >
                       <IconCpu className="h-3.5 w-3.5 text-[var(--color-lime)] opacity-70" />
                       {tag}
@@ -1135,13 +1301,13 @@ export function LandingPage() {
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#7dccff]/30 bg-[#1e2a38]/50 text-[#7dccff]">
                       <IconChat className="h-6 w-6" />
                     </div>
-                    <h2 className="font-display text-xl font-bold text-white sm:text-2xl">
+                    <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
                       Preguntas frecuentes
                     </h2>
                   </div>
                 }
               >
-                <p className="mt-1 font-body text-[15px] text-[#a8a8a8]">
+                <p className="mt-1 font-body text-[16px] text-[#a8a8a8]">
                   Respuestas directas antes del primer llamado.
                 </p>
                 <div className="mt-6 space-y-2">
@@ -1158,11 +1324,11 @@ export function LandingPage() {
                         ease: CONTENT_EASE,
                       }}
                     >
-                      <summary className="flex cursor-pointer list-none items-start justify-between gap-2 font-body text-[15px] font-medium text-[#f0f0f0] marker:content-none [&::-webkit-details-marker]:hidden">
+                      <summary className="flex cursor-pointer list-none items-start justify-between gap-2 font-body text-[16px] font-medium text-[#f0f0f0] marker:content-none [&::-webkit-details-marker]:hidden">
                         <span>{f.q}</span>
                         <IconChevronDown className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-lime)] transition-transform duration-200 group-open:rotate-180" />
                       </summary>
-                      <p className="mt-3 border-t border-[#3c3c3c] pt-3 font-body text-[14px] leading-relaxed text-[#b5b5b5] sm:text-[13px]">
+                      <p className="mt-3 border-t border-[#3c3c3c] pt-3 font-body text-[15px] leading-relaxed text-[#b5b5b5] sm:text-[14px]">
                         {f.a}
                       </p>
                     </motion.details>
@@ -1188,13 +1354,13 @@ export function LandingPage() {
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-lime)_50%,#555)] bg-[color-mix(in_srgb,var(--color-lime)_14%,#2a2a2a)] text-[var(--color-lime)]">
                       <IconEnvelope className="h-6 w-6" />
                     </div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--color-lime)]">
+                    <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--color-lime)]">
                       Siguiente paso
                     </p>
                   </div>
                 }
               >
-                <h2 className="font-display text-xl font-bold leading-tight text-white sm:text-2xl">
+                <h2 className="font-display text-2xl font-bold leading-tight text-white sm:text-3xl">
                   Mandanos un mail. Volvemos con hipótesis claras y una propuesta
                   por fases.
                 </h2>
@@ -1211,7 +1377,7 @@ export function LandingPage() {
                     Escribir a Bexo
                   </Link>
                 </motion.div>
-                <p className="mt-4 font-body text-[13px] text-[#888]">
+                <p className="mt-4 font-body text-[14px] text-[#888]">
                   © {new Date().getFullYear()} Bexo
                 </p>
               </HumanPanel>
@@ -1235,7 +1401,7 @@ export function LandingPage() {
             </motion.footer>
           </main>
 
-          <div className="flex h-6 shrink-0 items-center gap-3 border-t border-[color-mix(in_srgb,var(--color-navy)_18%,transparent)] bg-[var(--color-lime)] px-2 font-ide-mono text-[10px] text-[var(--color-navy)]">
+          <div className="flex h-7 shrink-0 items-center gap-3 border-t border-[color-mix(in_srgb,var(--color-navy)_18%,transparent)] bg-[var(--color-lime)] px-2 font-ide-mono text-[12px] text-[var(--color-navy)]">
             <span className="font-medium text-[color-mix(in_srgb,var(--color-navy)_92%,transparent)]">
               main*
             </span>
@@ -1272,7 +1438,7 @@ export function LandingPage() {
             <p className="font-body text-sm leading-relaxed text-[#efefef]">
               {tourMessage}
             </p>
-            <p className="mt-3 font-body text-[11px] text-[#888]">
+            <p className="mt-3 font-body text-[12px] text-[#888]">
               No hace falta hacer clic — seguí viendo la pantalla.
             </p>
           </motion.div>
